@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace XXTk.Auth.Samples.HttpApi
+namespace XXTk.Auth.Samples.Cookies.Web
 {
     public class Program
     {

@@ -1,0 +1,27 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <form id="account" method="post" asp-controller="Account" asp-action="Login">
+        <h4>登录</h4>
+        <hr />
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="UserName"></label>
+            <input asp-for="UserName" class="form-control" />
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Password">密码</label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <input asp-for="ReturnUrl" value="@ViewBag.ReturnUrl" />
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">登录</button>
+        </div>
+    </form>
+</div>
