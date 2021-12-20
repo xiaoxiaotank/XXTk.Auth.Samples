@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,13 +26,29 @@ namespace XXTk.Auth.Samples.Cookies.Web
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
+                    // 登录路径
                     options.LoginPath = "/Account/Login";
+                    // 登出路径
                     options.LogoutPath = "/Account/Logout";
+                    // 禁止访问路径
                     options.AccessDeniedPath = "/Account/AccessDenied";
-                    // authentication ticket 保存在 cookie 中的有效期
-                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    // returnUrl参数名，默认 returnUrl
+                    options.ReturnUrlParameter = CookieAuthenticationDefaults.ReturnUrlParameter;
+
                     // cookie 在浏览器中保存的时间
-                    options.Cookie.Expiration = TimeSpan.FromMinutes(30);
+                    //options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
+
+                    // cookie 中 authentication ticket 的有效期
+                    // 默认 14 天
+                    options.ExpireTimeSpan = TimeSpan.FromSeconds(10);
+
+                    // 是否滑动过期，默认 true
+                    options.SlidingExpiration = true;
+
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.Cookie.IsEssential = true;
                 });
 
             services.AddControllersWithViews();
@@ -50,6 +67,11 @@ namespace XXTk.Auth.Samples.Cookies.Web
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();

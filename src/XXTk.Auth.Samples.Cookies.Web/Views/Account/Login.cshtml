@@ -15,11 +15,16 @@
             <span asp-validation-for="UserName" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Password">密码</label>
+            <label asp-for="Password"></label>
             <input asp-for="Password" class="form-control" />
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
+        <div class="form-group">
+            <input asp-for="RememberMe" />
+            <label asp-for="RememberMe"></label>
+        </div>
         <input asp-for="ReturnUrl" value="@ViewBag.ReturnUrl" />
+        
         <div class="form-group">
             <button type="submit" class="btn btn-primary">登录</button>
         </div>

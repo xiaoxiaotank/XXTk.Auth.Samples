@@ -35,7 +35,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
                 return View();
             }
 
-            var identity = new ClaimsIdentity("Custom");
+            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             identity.AddClaims(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "1"),
@@ -44,7 +44,16 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+            {
+                // 是否持久化。
+                // 只有设置为 true，ExpiresUtc 才会生效
+                IsPersistent = input.RememberMe,
+
+                // authentication ticket 过期时间
+                // 若未设置，则取 CookieAuthenticationOptions.ExpireTimeSpan
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),              
+            });
 
             if (Url.IsLocalUrl(input.ReturnUrl))
             {
