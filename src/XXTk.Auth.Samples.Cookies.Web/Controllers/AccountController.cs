@@ -46,13 +46,13 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
             {
-                // 是否持久化。
-                // 只有设置为 true，ExpiresUtc 才会生效
+                // 是否持久化。默认非持久化，即该Cookie有效期是会话级别
+                // 注：只有设置为 true，下面的 ExpiresUtc 才会生效
                 IsPersistent = input.RememberMe,
 
                 // authentication ticket 过期时间
                 // 若未设置，则取 CookieAuthenticationOptions.ExpireTimeSpan
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),              
+                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
             });
 
             if (Url.IsLocalUrl(input.ReturnUrl))
