@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -11,6 +14,13 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly IOptionsMonitor<CookieAuthenticationOptions> _cookieAuthOptionsMonitor;
+
+        public AccountController(IOptionsMonitor<CookieAuthenticationOptions> cookieAuthOptions)
+        {
+            _cookieAuthOptionsMonitor = cookieAuthOptions;
+        } 
+
         [HttpGet]
         public IActionResult Login([FromQuery] string returnUrl = null)
         {
@@ -44,16 +54,37 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+            // 登录
+            // 内部会自动对 cookie 进行加密
+            var properties = new AuthenticationProperties
             {
                 // 是否持久化。默认非持久化，即该Cookie有效期是会话级别
-                // 注：只有设置为 true，下面的 ExpiresUtc 才会生效
+                // 注：只有设置为 true，下面的 ExpiresUtc 或全局配置的 options.ExpireTimeSpan 才会生效
                 IsPersistent = input.RememberMe,
 
                 // Cookie 中 authentication ticket 的过期时间
-                // 用于重写 CookieAuthenticationOptions.ExpireTimeSpan
+                // 重写 CookieAuthenticationOptions.ExpireTimeSpan 的值
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
+            };
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
+
+            #region 以下简要模拟 SignInAsync 内部细节，更多细节请查看 AuthenticationService 和 CookieAuthenticationHandler
+
+            //var options = _cookieAuthOptionsMonitor.Get(CookieAuthenticationDefaults.AuthenticationScheme);
+            //var ticket = new AuthenticationTicket(principal, properties, CookieAuthenticationDefaults.AuthenticationScheme);
+            //var cookieValue = options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding(HttpContext));
+
+            //options.CookieManager.AppendResponseCookie(HttpContext, options.Cookie.Name, cookieValue, new CookieOptions());
+
+            #endregion
+
+            #region 添加自定义Cookie
+
+            Response.Cookies.Append("author", "xiaoxiaotank", new CookieOptions
+            {
+                MaxAge = TimeSpan.FromSeconds(30)
             });
+            #endregion
 
             if (Url.IsLocalUrl(input.ReturnUrl))
             {
@@ -61,6 +92,12 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             }
 
             return Redirect("/");
+        }
+
+        private static string GetTlsTokenBinding(HttpContext context)
+        {
+            var binding = context.Features.Get<ITlsTokenBindingFeature>()?.GetProvidedTokenBindingId();
+            return binding == null ? null : Convert.ToBase64String(binding);
         }
 
         [HttpPost]

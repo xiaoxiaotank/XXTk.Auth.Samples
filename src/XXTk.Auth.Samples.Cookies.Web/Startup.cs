@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -28,7 +30,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                 {
                     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
 
-                    // 以下是当前 Cookie 方案全局配置，部分项可以在实际使用时重写
+                    // 以下是当前 Cookie 认证方案的全局配置，部分项可以在实际使用时重写
 
                     // 以下4个配置均在 CookieAuthenticationDefaults 类中有对应的默认值
                     // 登录路径
@@ -40,13 +42,13 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     // returnUrl参数名，默认 ReturnUrl
                     options.ReturnUrlParameter = "returnUrl";
 
-                    // Cookie 中 authentication ticket 的有效期（注：不是Cookie的有效期，当然，如果 Cookie 都没了，它也就失效了）
-                    // 仅当声明为 持久化（Persistent）时，该字段才会生效
-                    // 如果 MaxAge 和 Expires 均未设置，则将该值设置为 MaxAge
+                    // Cookie 中 authentication ticket 的有效期（注：不是Cookie的有效期。当然，如果 Cookie 都没了，它也就失效了）
+                    // 若未声明认证会话为 持久化（Persistent），则该字段无效，此时 ticket 的有效期与 Cookie 的有效期保持一致
+                    // 如果 MaxAge 和 Expires 均未设置，且声明认证会话为 持久化，则将该值设置为 MaxAge
                     // 默认 14 天
                     options.ExpireTimeSpan = TimeSpan.FromDays(14);
 
-                    // Expires，目前已无法使用
+                    // Expires，目前该字段已被禁用
                     //options.Cookie.Expiration = TimeSpan.FromMinutes(30);
 
                     // Cookie 在浏览器中的保存时间
@@ -58,7 +60,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     // Cookie 的过期方式是否为滑动过期
                     // 设置为 true 时，服务端收到请求，若发现 Cookie 的生存期已经超过了一半，服务端会重新颁发 Cookie（注：authentication ticket 也是新的）
                     // 默认 true
-                    options.SlidingExpiration = true;
+                    //options.SlidingExpiration = true;
 
                     // Cookie 的名字，默认是 .AspNetCore.Cookies
                     options.Cookie.Name = "auth";
@@ -84,7 +86,43 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     // 指示该 Cookie 对于应用的正常运行是必要的，不需要经过用户同意使用
                     // 默认 true
                     options.Cookie.IsEssential = true;
+
+                    // 设置 Cookie 管理器
+                    // 默认 ChunkingCookieManager
+                    options.CookieManager = new ChunkingCookieManager();
+
+                    // 用于加密和解密 Cookie 中的 authentication ticket
+                    // 以下为默认值
+                    var dataProtector = options.DataProtectionProvider.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", CookieAuthenticationDefaults.AuthenticationScheme, "v2");
+                    options.TicketDataFormat = new TicketDataFormat(dataProtector);
+
+                    // 登录时回调
+                    options.Events.OnSigningIn = context =>
+                    {
+                        Console.WriteLine($"{context.Principal.Identity.Name} 正在登录...");
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnSignedIn = context =>
+                    {
+                        Console.WriteLine($"{context.Principal.Identity.Name} 已登录");
+                        return Task.CompletedTask;
+                    };
                 });
+
+            services.AddCookiePolicy(options =>
+            {
+                options.OnAppendCookie = context =>
+                {
+                    Console.WriteLine("------------------ On Append Cookie --------------------");
+                    Console.WriteLine($"Name: {context.CookieName}\tValue: {context.CookieValue}");
+                };
+                options.OnDeleteCookie = context =>
+                {
+                    Console.WriteLine("------------------ On Delete Cookie --------------------");
+                    Console.WriteLine($"Name: {context.CookieName}");
+                };
+            });
 
             services.AddControllersWithViews();
         }
@@ -101,14 +139,27 @@ namespace XXTk.Auth.Samples.Cookies.Web
             }
             app.UseStaticFiles();
 
+            //app.Use(async (context, next) =>
+            //{
+            //    Console.WriteLine("Cookies:.........................");
+
+            //    var cookies = context.Request.Cookies;
+            //    foreach (var cookie in cookies)
+            //    {
+            //        Console.WriteLine($"Name:{cookie.Key}\tValue:{cookie.Value}");
+            //    }
+
+            //    await next();
+            //});
+
             app.UseRouting();
 
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                
-            });
+            // Cookie 策略中间件
+            app.UseCookiePolicy();
 
+            // 身份认证中间件
             app.UseAuthentication();
+            // 授权中间件
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

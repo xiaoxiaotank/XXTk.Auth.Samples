@@ -25,6 +25,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             return View();
         }
 
+        [HttpGet]
         [Authorize]
         public IActionResult Privacy()
         {
