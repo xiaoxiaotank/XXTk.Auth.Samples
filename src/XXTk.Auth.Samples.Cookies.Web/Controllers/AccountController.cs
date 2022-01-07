@@ -50,8 +50,8 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
                 // 注：只有设置为 true，下面的 ExpiresUtc 才会生效
                 IsPersistent = input.RememberMe,
 
-                // authentication ticket 过期时间
-                // 若未设置，则取 CookieAuthenticationOptions.ExpireTimeSpan
+                // Cookie 中 authentication ticket 的过期时间
+                // 用于重写 CookieAuthenticationOptions.ExpireTimeSpan
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
             });
 
