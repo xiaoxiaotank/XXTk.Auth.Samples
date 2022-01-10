@@ -25,10 +25,13 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+            // 将选项配置提出来是为了在配置时使用 DI服务 
+            services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
+                .Configure<IDataProtectionProvider>((options, dp) =>
                 {
-                    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+                    // set-cookie: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
+                    // 默认配置参考ASP.NET Core源码：class CookieAuthenticationOptions
+                    // 默认后期配置参考ASP.NET Core源码：class PostConfigureCookieAuthenticationOptions
 
                     // 以下是当前 Cookie 认证方案的全局配置，部分项可以在实际使用时重写
 
@@ -93,6 +96,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
                     // 用于加密和解密 Cookie 中的 authentication ticket
                     // 以下为默认值
+                    options.DataProtectionProvider ??= dp;
                     var dataProtector = options.DataProtectionProvider.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", CookieAuthenticationDefaults.AuthenticationScheme, "v2");
                     options.TicketDataFormat = new TicketDataFormat(dataProtector);
 
@@ -109,6 +113,8 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         return Task.CompletedTask;
                     };
                 });
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
             services.AddCookiePolicy(options =>
             {
