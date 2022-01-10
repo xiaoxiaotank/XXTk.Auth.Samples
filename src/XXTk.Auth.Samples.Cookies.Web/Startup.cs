@@ -44,12 +44,15 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     options.ReturnUrlParameter = "returnUrl";
 
                     // Cookie 中 authentication ticket 的有效期（注：不是Cookie的有效期。当然，如果 Cookie 都没了，它也就失效了）
-                    // 若未声明认证会话为 持久化（Persistent），则该字段无效，此时 ticket 的有效期与 Cookie 的有效期保持一致
-                    // 如果 MaxAge 和 Expires 均未设置，且声明认证会话为 持久化，则将该值设置为 MaxAge
+                    // 若未声明 AuthenticationProperties.Persistent = true，则该字段无效，此时 ticket 的有效期与 Cookie 的有效期保持一致
+                    // 当声明 AuthenticationProperties.Persistent = true 时：
+                    //      通过(AuthenticationProperties.IssuedUtc + ExpireTimeSpan)得到一个具体的时间点，会作为 Cookie 的 Expires 属性，
+                    //      票据是否过期是通过该Expires与当前时间作比较来判断的
+                    //      此时，如果没有设置 MaxAge，则该值也就是Cookie的有效期
                     // 默认 14 天
                     options.ExpireTimeSpan = TimeSpan.FromDays(14);
 
-                    // Expires，目前该字段已被禁用
+                    // Expires，目前该字段已被禁用，应该使用 ExpireTimeSpan 
                     //options.Cookie.Expiration = TimeSpan.FromMinutes(30);
 
                     // Cookie 在浏览器中的保存时间
@@ -61,7 +64,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     // Cookie 的过期方式是否为滑动过期
                     // 设置为 true 时，服务端收到请求，若发现 Cookie 的生存期已经超过了一半，服务端会重新颁发 Cookie（注：authentication ticket 也是新的）
                     // 默认 true
-                    //options.SlidingExpiration = true;
+                    options.SlidingExpiration = true;
 
                     // Cookie 的名字，默认是 .AspNetCore.Cookies
                     options.Cookie.Name = "auth";
