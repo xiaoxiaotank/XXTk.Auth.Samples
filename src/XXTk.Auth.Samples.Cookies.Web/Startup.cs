@@ -8,8 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.Cookies.Web
@@ -100,13 +98,14 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     var dataProtector = options.DataProtectionProvider.CreateProtector("Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware", CookieAuthenticationDefaults.AuthenticationScheme, "v2");
                     options.TicketDataFormat = new TicketDataFormat(dataProtector);
 
-                    // 登录时回调
+                    // 登录前回调
                     options.Events.OnSigningIn = context =>
                     {
                         Console.WriteLine($"{context.Principal.Identity.Name} 正在登录...");
                         return Task.CompletedTask;
                     };
 
+                    // 登录后回调
                     options.Events.OnSignedIn = context =>
                     {
                         Console.WriteLine($"{context.Principal.Identity.Name} 已登录");
@@ -116,6 +115,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
+            // 全局Cookie策略
             services.AddCookiePolicy(options =>
             {
                 options.OnAppendCookie = context =>
@@ -123,6 +123,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     Console.WriteLine("------------------ On Append Cookie --------------------");
                     Console.WriteLine($"Name: {context.CookieName}\tValue: {context.CookieValue}");
                 };
+
                 options.OnDeleteCookie = context =>
                 {
                     Console.WriteLine("------------------ On Delete Cookie --------------------");
@@ -144,19 +145,6 @@ namespace XXTk.Auth.Samples.Cookies.Web
                 app.UseExceptionHandler("/Home/Error");
             }
             app.UseStaticFiles();
-
-            //app.Use(async (context, next) =>
-            //{
-            //    Console.WriteLine("Cookies:.........................");
-
-            //    var cookies = context.Request.Cookies;
-            //    foreach (var cookie in cookies)
-            //    {
-            //        Console.WriteLine($"Name:{cookie.Key}\tValue:{cookie.Value}");
-            //    }
-
-            //    await next();
-            //});
 
             app.UseRouting();
 

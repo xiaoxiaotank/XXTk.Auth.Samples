@@ -1,5 +1,3 @@
-using System;
-
 namespace XXTk.Auth.Samples.Cookies.Web.Models
 {
     public class ErrorViewModel
