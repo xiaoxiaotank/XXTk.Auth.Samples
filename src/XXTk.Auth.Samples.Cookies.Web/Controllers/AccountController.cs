@@ -36,7 +36,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             // 用户名密码相同视为登录成功
             if (input.UserName != input.Password)
             {
-                ModelState.AddModelError("CustomError", "无效的用户名或密码");
+                ModelState.AddModelError("UserNameOrPasswordError", "无效的用户名或密码");
             }
 
             if (!ModelState.IsValid)
@@ -44,26 +44,31 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
                 return View();
             }
 
+            // 参数 authenticationType 必须非空或空白字符串，这样 identity.IsAuthenticated 才会是 true
             var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
             identity.AddClaims(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString("N")),
                 new Claim(ClaimTypes.Name, input.UserName)
             });
 
             var principal = new ClaimsPrincipal(identity);
-
+            
             // 登录
             // 内部会自动对 cookie 进行加密
             var properties = new AuthenticationProperties
             {
-                // 是否持久化。默认非持久化，即该Cookie有效期是会话级别
-                // 注：只有设置为 true，下面的 ExpiresUtc 或全局配置的 options.ExpireTimeSpan 才会生效
+                // 票据所在的Cookie是否持久化。默认非持久化，即该Cookie有效期是会话级别
+                // 若为 true，则会将 ExpiresUtc 的值设置到 Cookie 的 Expires 属性上
                 IsPersistent = input.RememberMe,
 
                 // Cookie 中 authentication ticket 的过期时间
-                // 重写 CookieAuthenticationOptions.ExpireTimeSpan 的值
+                // 重写 CookieAuthenticationOptions.ExpireTimeSpan 的值，如果不设置该值，则取 CookieAuthenticationOptions.ExpireTimeSpan
                 ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
+
+                // 当Cookie为滑动过期时，允许重新颁发Cookie
+                // 默认null，等同于 true
+                AllowRefresh = true,
             };
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
 
@@ -71,6 +76,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
             //var options = _cookieAuthOptionsMonitor.Get(CookieAuthenticationDefaults.AuthenticationScheme);
             //var ticket = new AuthenticationTicket(principal, properties, CookieAuthenticationDefaults.AuthenticationScheme);
+            // ticket加密
             //var cookieValue = options.TicketDataFormat.Protect(ticket, GetTlsTokenBinding(HttpContext));
 
             //options.CookieManager.AppendResponseCookie(HttpContext, options.Cookie.Name, cookieValue, new CookieOptions());

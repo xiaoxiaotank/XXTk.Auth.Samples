@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -26,7 +27,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
             // 将选项配置提出来是为了在配置时使用 DI服务 
             services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure<IDataProtectionProvider>((options, dp) =>
-                {
+                {                    
                     // set-cookie: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
                     // 默认配置参考ASP.NET Core源码：class CookieAuthenticationOptions
                     // 默认后期配置参考ASP.NET Core源码：class PostConfigureCookieAuthenticationOptions
@@ -44,15 +45,15 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     options.ReturnUrlParameter = "returnUrl";
 
                     // Cookie 中 authentication ticket 的有效期（注：不是Cookie的有效期。当然，如果 Cookie 都没了，它也就失效了）
-                    // 若未声明 AuthenticationProperties.Persistent = true，则该字段无效，此时 ticket 的有效期与 Cookie 的有效期保持一致
+                    // 票据是否过期是通过该Expires与当前时间作比较来判断的
                     // 当声明 AuthenticationProperties.Persistent = true 时：
                     //      通过(AuthenticationProperties.IssuedUtc + ExpireTimeSpan)得到一个具体的时间点，会作为 Cookie 的 Expires 属性，
-                    //      票据是否过期是通过该Expires与当前时间作比较来判断的
-                    //      此时，如果没有设置 MaxAge，则该值也就是Cookie的有效期
+                    //      此时，如果没有设置 MaxAge，则该值也是Cookie的有效期
                     // 默认 14 天
                     options.ExpireTimeSpan = TimeSpan.FromDays(14);
 
-                    // Expires，目前该字段已被禁用，应该使用 ExpireTimeSpan 
+                    // Cooke 的属性 Expires，指示 Cookie 在浏览器中的保存时间
+                    // 目前该字段已被禁用，应该使用 ExpireTimeSpan，只有当票据持久化时，才设置到 Expires 属性上
                     //options.Cookie.Expiration = TimeSpan.FromMinutes(30);
 
                     // Cookie 在浏览器中的保存时间
@@ -73,7 +74,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     //options.Cookie.Domain = ".xxx.cn";
 
                     // 有权限访问 Cookie 的路径
-                    //options.Cookie.Path = "/Home";
+                    options.Cookie.Path = "/";
 
                     // 允许 跨站的第三方站点 向 当前站点 发送GET请求时 携带Cookie （防止CSRF攻击）
                     // 默认 SameSiteMode.Lax
@@ -114,11 +115,25 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         Console.WriteLine($"{context.Principal.Identity.Name} 已登录");
                         return Task.CompletedTask;
                     };
+
+                    // 注销时回调
+                    options.Events.OnSigningOut = context =>
+                    {
+                        Console.WriteLine($"{context.HttpContext.User.Identity.Name} 注销");
+                        return Task.CompletedTask;
+                    };
+
+                    // 验证 Principal 时回调
+                    options.Events.OnValidatePrincipal += context =>
+                    {
+                        Console.WriteLine($"{context.Principal.Identity.Name} 验证 Principal");
+                        return Task.CompletedTask;
+                    };
                 });
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // 全局Cookie策略
+            // Cookie全局策略
             services.AddCookiePolicy(options =>
             {
                 options.OnAppendCookie = context =>
@@ -132,6 +147,18 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     Console.WriteLine("------------------ On Delete Cookie --------------------");
                     Console.WriteLine($"Name: {context.CookieName}");
                 };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                // 授权配置，以下均使用的默认值
+
+                // 默认的授权策略
+                // 默认为要求通过身份认证的用户
+                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                // 当存在多个授权处理器时，若其中一个失败后，后续的处理器是否还继续执行
+                // 默认 true
+                options.InvokeHandlersAfterFailure = true;
             });
 
             services.AddControllersWithViews();
