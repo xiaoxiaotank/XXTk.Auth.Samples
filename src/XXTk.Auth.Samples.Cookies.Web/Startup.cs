@@ -27,7 +27,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
             // 将选项配置提出来是为了在配置时使用 DI服务 
             services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure<IDataProtectionProvider>((options, dp) =>
-                {                    
+                {
                     // set-cookie: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
                     // 默认配置参考ASP.NET Core源码：class CookieAuthenticationOptions
                     // 默认后期配置参考ASP.NET Core源码：class PostConfigureCookieAuthenticationOptions
@@ -129,6 +129,9 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         Console.WriteLine($"{context.Principal.Identity.Name} 验证 Principal");
                         return Task.CompletedTask;
                     };
+
+                    // 将会话信息存储在服务端
+                    //options.SessionStore = new MemoryCacheTicketStore(options.ExpireTimeSpan);
                 });
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);

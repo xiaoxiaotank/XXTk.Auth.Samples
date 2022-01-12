@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using IdentityModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -21,6 +23,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Login([FromQuery] string returnUrl = null)
         {
             ViewBag.ReturnUrl = returnUrl;
@@ -29,6 +32,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromForm] LoginViewModel input)
         {
             ViewBag.ReturnUrl = input.ReturnUrl;
@@ -45,15 +49,17 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             }
 
             // 参数 authenticationType 必须非空或空白字符串，这样 identity.IsAuthenticated 才会是 true
-            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme, JwtClaimTypes.Name, JwtClaimTypes.Role);
             identity.AddClaims(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString("N")),
-                new Claim(ClaimTypes.Name, input.UserName)
+                //new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString("N")),
+                //new Claim(ClaimTypes.Name, input.UserName)
+                new Claim(JwtClaimTypes.Id, Guid.NewGuid().ToString("N")),
+                new Claim(JwtClaimTypes.Name, input.UserName)
             });
 
             var principal = new ClaimsPrincipal(identity);
-            
+
             // 登录
             // 内部会自动对 cookie 进行加密
             var properties = new AuthenticationProperties
