@@ -32,9 +32,9 @@
         "Host": "192.168.10.131",
         "Port": "7381"
       }
-    ]
-  },
-  "MaxValueLength": 1024,
-  "PoolSize": 5,
-  "KeyPrefix": "cookie_web_"
+    ],
+    "MaxValueLength": 1024,
+    "PoolSize": 5,
+    "KeyPrefix": "cookie-web:"
+  }
 }

@@ -70,7 +70,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
                 // Cookie 中 authentication ticket 的过期时间
                 // 重写 CookieAuthenticationOptions.ExpireTimeSpan 的值，如果不设置该值，则取 CookieAuthenticationOptions.ExpireTimeSpan
-                ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
+                //ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(60),
 
                 // 当Cookie为滑动过期时，允许重新颁发Cookie
                 // 默认null，等同于 true

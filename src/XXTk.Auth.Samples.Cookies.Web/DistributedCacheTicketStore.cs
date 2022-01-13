@@ -1,22 +1,24 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.Cookies.Web
 {
-    public class MemoryCacheTicketStore : ITicketStore
+    public class DistributedCacheTicketStore : ITicketStore
     {
-        private const string KeyPrefix = "AuthSessionStore-";
-        private readonly IMemoryCache _cache;
+        private const string KeyPrefix = "auth-session-store:";
+        private readonly IDistributedCache _cache;
         private readonly TimeSpan _defaultExpireTimeSpan;
+        private readonly TicketSerializer _serializer;
 
-        public MemoryCacheTicketStore(TimeSpan defaultExpireTimeSpan, MemoryCacheOptions options = null)
+        public DistributedCacheTicketStore(IDistributedCache cache, TimeSpan defaultExpireTimeSpan, TicketSerializer serializer = null)
         {
-            options ??= new MemoryCacheOptions();
-            _cache = new MemoryCache(options);
+            _cache = cache;
             _defaultExpireTimeSpan = defaultExpireTimeSpan;
+            _serializer = serializer ?? TicketSerializer.Default;
         }
 
         public async Task<string> StoreAsync(AuthenticationTicket ticket)
@@ -27,9 +29,9 @@ namespace XXTk.Auth.Samples.Cookies.Web
             return key;
         }
 
-        public Task RenewAsync(string key, AuthenticationTicket ticket)
+        public async Task RenewAsync(string key, AuthenticationTicket ticket)
         {
-            var options = new MemoryCacheEntryOptions();
+            var options = new DistributedCacheEntryOptions();
             var expiresUtc = ticket.Properties.ExpiresUtc;
             if (expiresUtc.HasValue)
             {
@@ -40,15 +42,18 @@ namespace XXTk.Auth.Samples.Cookies.Web
                 options.SetSlidingExpiration(_defaultExpireTimeSpan);
             }
 
-            _cache.Set(key, ticket, options);
-
-            return Task.CompletedTask;
+            await _cache.SetAsync(key, _serializer.Serialize(ticket), options);
         }
 
-        public Task<AuthenticationTicket> RetrieveAsync(string key)
+        public async Task<AuthenticationTicket> RetrieveAsync(string key)
         {
-            _cache.TryGetValue(key, out AuthenticationTicket ticket);
-            return Task.FromResult(ticket);
+            var ticketByte = await _cache.GetAsync(key);
+            if(ticketByte is null)
+            {
+                return null;
+            }
+
+            return _serializer.Deserialize(ticketByte);
         }
 
         public Task RemoveAsync(string key)

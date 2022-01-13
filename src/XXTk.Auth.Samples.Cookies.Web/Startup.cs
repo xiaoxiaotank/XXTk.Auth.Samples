@@ -5,9 +5,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.System.Text.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -24,9 +27,11 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            #region 通过Redis存储数据保护密钥，解决集群和分布式环境下数据解密问题
+            // 将 redis.json 中配置修改为自己的配置
             //var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>();
             //services.AddStackExchangeRedisExtensions<SystemTextJsonSerializer>(redisConfig);
+
+            #region 通过Redis存储数据保护密钥，解决集群和分布式环境下数据解密问题
 
             //var redis = ConnectionMultiplexer.Connect(redisConfig.ConfigurationOptions);
             //services.AddDataProtection()
@@ -36,9 +41,15 @@ namespace XXTk.Auth.Samples.Cookies.Web
             // 通过  lrange dp-key 0 -1 查看保存的密钥 
             #endregion
 
+            // 借助Redis，实现分布式缓存，用于存储会话信息
+            //services.AddStackExchangeRedisCache(options =>
+            //{
+            //    options.ConfigurationOptions = redisConfig.ConfigurationOptions;
+            //});
+
             // 将选项配置提出来是为了在配置时使用 DI服务 
             services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
-                .Configure<IDataProtectionProvider>((options, dp) =>
+                .Configure<IDataProtectionProvider, IDistributedCache>((options, dp, distributedCache) =>
                 {
                     // set-cookie: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie
                     // 默认配置参考ASP.NET Core源码：class CookieAuthenticationOptions
@@ -142,8 +153,10 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         return Task.CompletedTask;
                     };
 
-                    // （取消注释）将会话信息存储在服务端
+                    // （取消注释）将会话信息存储在服务端内存
                     //options.SessionStore = new MemoryCacheTicketStore(options.ExpireTimeSpan);
+                    // （取消注释）将会话信息存储在服务端分布式缓存
+                    //options.SessionStore = new DistributedCacheTicketStore(distributedCache, options.ExpireTimeSpan);
                 });
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);

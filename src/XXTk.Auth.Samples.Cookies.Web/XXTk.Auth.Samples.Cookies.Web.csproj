@@ -9,6 +9,7 @@
     <PackageReference Include="IdentityModel" Version="6.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="6.0.1" />
     <PackageReference Include="StackExchange.Redis.Extensions.AspNetCore" Version="8.0.2" />
     <PackageReference Include="StackExchange.Redis.Extensions.System.Text.Json" Version="8.0.2" />
   </ItemGroup>
