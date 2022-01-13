@@ -1,0 +1,40 @@
+{
+  "Redis": {
+    //"Password": "my_super_secret_password",
+    "AllowAdmin": true,
+    "Ssl": false,
+    "ConnectTimeout": 6000,
+    "ConnectRetry": 2,
+    "Database": 0,
+    //"ServiceName": "my-sentinel",
+    "Hosts": [
+      {
+        "Host": "192.168.10.131",
+        "Port": "6379"
+      },
+      {
+        "Host": "192.168.10.131",
+        "Port": "6380"
+      },
+      {
+        "Host": "192.168.10.131",
+        "Port": "6381"
+      },
+      {
+        "Host": "192.168.10.131",
+        "Port": "7379"
+      },
+      {
+        "Host": "192.168.10.131",
+        "Port": "7380"
+      },
+      {
+        "Host": "192.168.10.131",
+        "Port": "7381"
+      }
+    ]
+  },
+  "MaxValueLength": 1024,
+  "PoolSize": 5,
+  "KeyPrefix": "cookie_web_"
+}

@@ -24,6 +24,18 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
+            #region 通过Redis存储数据保护密钥，解决集群和分布式环境下数据解密问题
+            //var redisConfig = Configuration.GetSection("Redis").Get<RedisConfiguration>();
+            //services.AddStackExchangeRedisExtensions<SystemTextJsonSerializer>(redisConfig);
+
+            //var redis = ConnectionMultiplexer.Connect(redisConfig.ConfigurationOptions);
+            //services.AddDataProtection()
+            //    .SetApplicationName(Assembly.GetEntryAssembly().FullName)
+            //    .PersistKeysToStackExchangeRedis(redis, "dp-key");
+
+            // 通过  lrange dp-key 0 -1 查看保存的密钥 
+            #endregion
+
             // 将选项配置提出来是为了在配置时使用 DI服务 
             services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
                 .Configure<IDataProtectionProvider>((options, dp) =>
@@ -130,7 +142,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         return Task.CompletedTask;
                     };
 
-                    // 将会话信息存储在服务端
+                    // （取消注释）将会话信息存储在服务端
                     //options.SessionStore = new MemoryCacheTicketStore(options.ExpireTimeSpan);
                 });
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
