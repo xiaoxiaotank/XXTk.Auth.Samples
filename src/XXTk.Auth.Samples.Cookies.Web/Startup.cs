@@ -9,6 +9,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Net.Http.Headers;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.System.Text.Json;
 using System;
@@ -101,7 +102,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
                     // 允许 跨站的第三方站点 向 当前站点 发送GET请求时 携带Cookie （防止CSRF攻击）
                     // 默认 SameSiteMode.Lax
-                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
 
                     // 禁止客户端脚本访问Cookie（防止XSS攻击）
                     // 默认 true
@@ -147,10 +148,24 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     };
 
                     // 验证 Principal 时回调
-                    options.Events.OnValidatePrincipal += context =>
+                    options.Events.OnValidatePrincipal = context =>
                     {
                         Console.WriteLine($"{context.Principal.Identity.Name} 验证 Principal");
                         return Task.CompletedTask;
+                    };
+
+                    options.Events.OnRedirectToLogin = async context =>
+                    {
+                        if (IsAjaxRequest(context.Request))
+                        {
+                            context.Response.Headers[HeaderNames.Location] = context.RedirectUri;
+                            context.Response.StatusCode = 401;
+                            await context.Response.WriteAsJsonAsync(new { Message = "登录已过期，请重新登录" });
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
                     };
 
                     // （取消注释）将会话信息存储在服务端内存
@@ -208,7 +223,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
             // Cookie 策略中间件
             app.UseCookiePolicy();
-
+            
             // 身份认证中间件
             app.UseAuthentication();
             // 授权中间件
@@ -220,6 +235,12 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private static bool IsAjaxRequest(HttpRequest request)
+        {
+            return string.Equals(request.Query[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal) ||
+                string.Equals(request.Headers[HeaderNames.XRequestedWith], "XMLHttpRequest", StringComparison.Ordinal);
         }
     }
 }

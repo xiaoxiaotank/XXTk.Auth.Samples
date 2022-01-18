@@ -28,6 +28,13 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Authorize]
+        public JsonResult GetMessage()
+        {
+            return Json(new { Message = $"Hello! {User.Identity.Name}" });
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

@@ -4,5 +4,33 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <input type="button" 
+           class="btn-primary" 
+           value="点我发送Ajax请求（需要用户通过身份认证）" 
+           onclick="ajaxRequest()"/>
 </div>
+
+@section Scripts {
+<script type="text/javascript">
+    $(function(){
+        
+    })
+
+    function ajaxRequest(){
+            $.ajax({
+                url: "/Home/GetMessage",
+                type: "get",
+                success: function(res){
+                    alert(res.message);
+                },
+                error: function(e){
+                    var message = '';
+                    if(e.status === 401){
+                        message = e.responseJSON.message;
+                    }
+                    alert(`err: ${e.status} ${e.statusText} ${message}`)
+                }
+            })
+        }
+</script>
+}
