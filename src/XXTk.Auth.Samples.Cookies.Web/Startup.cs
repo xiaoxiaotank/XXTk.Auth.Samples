@@ -164,6 +164,9 @@ namespace XXTk.Auth.Samples.Cookies.Web
                         }
                         else
                         {
+                            // 添加额外参数
+                            //context.RedirectUri += $"&now={DateTime.Now:o}";
+
                             context.Response.Redirect(context.RedirectUri);
                         }
                     };
