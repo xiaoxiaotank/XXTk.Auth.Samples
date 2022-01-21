@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi
@@ -15,6 +16,15 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    var env = context.HostingEnvironment;
+
+                    config.AddJsonFile("jwt.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"jwt.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables()
+                        .AddCommandLine(args);
                 });
     }
 }

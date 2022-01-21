@@ -1,0 +1,7 @@
+{
+  "Jwt": {
+    "Audience": "http://localhost:5000",
+    "Issuer": "http://localhost:5000",
+    "SymmetricSecurityKeyString": "Symmetric Security Key"
+  }
+}
