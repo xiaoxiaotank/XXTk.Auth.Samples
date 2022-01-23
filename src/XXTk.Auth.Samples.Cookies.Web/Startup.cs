@@ -1,3 +1,4 @@
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -13,6 +14,7 @@ using Microsoft.Net.Http.Headers;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.System.Text.Json;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.Cookies.Web
@@ -148,10 +150,17 @@ namespace XXTk.Auth.Samples.Cookies.Web
                     };
 
                     // 验证 Principal 时回调
-                    options.Events.OnValidatePrincipal = context =>
+                    options.Events.OnValidatePrincipal = async context =>
                     {
                         Console.WriteLine($"{context.Principal.Identity.Name} 验证 Principal");
-                        return Task.CompletedTask;
+
+                        var userId = context.Principal.Identities.First().Claims.First(c => c.Type == JwtClaimTypes.Id).Value;
+                        var cacheKey = $"delete-auth-cookie:{userId}";
+                        if (!string.IsNullOrWhiteSpace(await distributedCache.GetStringAsync(cacheKey)))
+                        {
+                            context.RejectPrincipal();
+                            await distributedCache.RemoveAsync(cacheKey);
+                        }
                     };
 
                     options.Events.OnRedirectToLogin = async context =>
@@ -226,7 +235,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
 
             // Cookie 策略中间件
             app.UseCookiePolicy();
-            
+
             // 身份认证中间件
             app.UseAuthentication();
             // 授权中间件

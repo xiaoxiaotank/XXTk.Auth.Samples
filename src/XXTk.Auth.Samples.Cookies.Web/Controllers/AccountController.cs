@@ -5,8 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using XXTk.Auth.Samples.Cookies.Web.Models;
@@ -16,10 +18,14 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
     public class AccountController : Controller
     {
         private readonly IOptionsMonitor<CookieAuthenticationOptions> _cookieAuthOptionsMonitor;
+        private readonly IDistributedCache _cache;
 
-        public AccountController(IOptionsMonitor<CookieAuthenticationOptions> cookieAuthOptions)
+        public AccountController(
+            IOptionsMonitor<CookieAuthenticationOptions> cookieAuthOptions,
+            IDistributedCache cache)
         {
             _cookieAuthOptionsMonitor = cookieAuthOptions;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -117,6 +123,22 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
             await HttpContext.SignOutAsync();
 
             return Redirect("/");
+        }
+        
+        /// <summary>
+        /// 模拟更新账户信息后，用户需要重新登录
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> UpdateAccount()
+        {
+            // ... 更新信息
+
+            var userId = User.Identities.First().Claims.First(c => c.Type == JwtClaimTypes.Id).Value;
+            await _cache.SetStringAsync($"delete-auth-cookie:{userId}", userId);
+
+            return Ok();
         }
 
         [HttpGet]
