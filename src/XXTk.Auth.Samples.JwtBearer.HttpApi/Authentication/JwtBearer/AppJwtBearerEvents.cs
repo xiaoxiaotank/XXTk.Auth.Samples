@@ -29,7 +29,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer
             Console.WriteLine("-------------- MessageReceived Begin --------------");
 
             base.MessageReceived(context);
-            if(context.Result != null)
+            if (context.Result != null)
             {
                 return Task.CompletedTask;
             }
@@ -162,7 +162,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer
             Console.WriteLine("-------------- Forbidden Begin --------------");
 
             base.Forbidden(context);
-            if(context.Result != null)
+            if (context.Result != null)
             {
                 return Task.CompletedTask;
             }

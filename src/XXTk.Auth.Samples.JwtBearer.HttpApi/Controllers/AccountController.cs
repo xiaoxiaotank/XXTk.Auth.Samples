@@ -13,7 +13,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text.Json;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Dtos;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers

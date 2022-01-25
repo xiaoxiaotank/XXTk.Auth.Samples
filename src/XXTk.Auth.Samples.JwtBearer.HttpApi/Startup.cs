@@ -7,11 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
-using System.Security.Cryptography;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi
@@ -35,8 +33,10 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
             #region Rsa相关配置
             jwtOptions.RsaSecurityPrivateKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.private.json"));
             jwtOptions.RsaSecurityPublicKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.public.json"));
-            jwtOptions.Algorithms = SecurityAlgorithms.RsaSha256Signature; 
+            jwtOptions.Algorithms = SecurityAlgorithms.RsaSha256Signature;
             #endregion
+
+            services.AddSingleton(jwtOptions);
 
             // 使用对称加密进行签名（不推荐）
             //services.AddSingleton(sp => new SigningCredentials(jwtOptions.SymmetricSecurityKey, jwtOptions.Algorithms));
@@ -76,20 +76,24 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                         ValidateAudience = true,
 
                         // 签发者用于token签名的密钥
-                        // 对称加密，使用相同的key进行加密解密
+                        // 对称加密，使用相同的key进行加签验签
                         //IssuerSigningKey = jwtOptions.SymmetricSecurityKey,
-                        // 非对称加密，若使用私钥加密，则使用公钥解密
+                        // 非对称加密，使用私钥加签，使用公钥验签
                         IssuerSigningKey = jwtOptions.RsaSecurityPublicKey,
                         // 是否验证签发者用于token签名的密钥
                         // 默认 false
                         ValidateIssuerSigningKey = true,
 
-                        // 是否要求token必须包含过期时间
-                        // 默认 true
-                        RequireExpirationTime = true,
                         // 是否验证token是否在有效期内（包括nbf和exp）
                         // 默认 true
                         ValidateLifetime = true,
+
+                        // 是否要求token必须进行签名
+                        // 默认 true
+                        RequireSignedTokens = true,
+                        // 是否要求token必须包含过期时间
+                        // 默认 true
+                        RequireExpirationTime = true,
 
                         // 设置 HttpContext.User.Identity.NameClaimType，便于 HttpContext.User.Identity.Name 取到正确的值
                         NameClaimType = JwtClaimTypes.Name,
