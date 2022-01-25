@@ -1,14 +1,19 @@
 ﻿using IdentityModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Dtos;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
@@ -65,12 +70,49 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
                 SigningCredentials = _signingCredentials
             };
 
-            var handler = _jwtBearerOptions.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>().FirstOrDefault() 
+            var handler = _jwtBearerOptions.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>().FirstOrDefault()
                 ?? new JwtSecurityTokenHandler();
             var securityToken = handler.CreateJwtSecurityToken(tokenDescriptor);
             var token = handler.WriteToken(securityToken);
 
             return token;
+        }
+
+        /// <summary>
+        /// 生成Rsa密钥对（不要把它放到正式环境中）
+        /// </summary>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("/rsa")]
+        public IActionResult GenerateRsaKeyParies([FromServices] IWebHostEnvironment env)
+        {
+            RSAParameters privateKey, publicKey;
+
+            // >= 2048 否则长度太短不安全
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                try
+                {
+                    privateKey = rsa.ExportParameters(true);
+                    publicKey = rsa.ExportParameters(false);
+                }
+                finally
+                {
+                    rsa.PersistKeyInCsp = false;
+                }
+            }
+
+            var dir = Path.Combine(env.ContentRootPath, "Rsa");
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            System.IO.File.WriteAllText(Path.Combine(dir, "key.private.json"), JsonConvert.SerializeObject(privateKey));
+            System.IO.File.WriteAllText(Path.Combine(dir, "key.public.json"), JsonConvert.SerializeObject(publicKey));
+
+            return Ok();
         }
     }
 }
