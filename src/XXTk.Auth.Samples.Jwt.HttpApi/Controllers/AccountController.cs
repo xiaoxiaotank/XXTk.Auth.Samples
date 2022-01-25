@@ -60,7 +60,8 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
                 }),
                 Issuer = _jwtBearerOptions.TokenValidationParameters.ValidIssuer,
                 Audience = _jwtBearerOptions.TokenValidationParameters.ValidAudience,
-                Expires = DateTime.UtcNow.AddSeconds(10),
+                // 必须 Utc，默认1小时
+                Expires = DateTime.UtcNow.AddMinutes(10),
                 SigningCredentials = _signingCredentials
             };
 

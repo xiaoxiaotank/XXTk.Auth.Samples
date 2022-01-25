@@ -15,9 +15,9 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
         public string SymmetricSecurityKeyString { get; set; }
 
-        public string Algorithms => DefaultAlgorithms;
+        public string Algorithms { get; set; } = DefaultAlgorithms;
 
-        public Encoding Encoding => DefaultEncoding;
+        public Encoding Encoding { get; set; } = DefaultEncoding;
 
         public SymmetricSecurityKey SymmetricSecurityKey => new(Encoding.GetBytes(SymmetricSecurityKeyString));
     }
