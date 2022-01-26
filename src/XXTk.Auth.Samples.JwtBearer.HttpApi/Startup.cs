@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Text;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi
@@ -51,9 +53,9 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        // 有效的签名算法列表，仅列出的算法是有效的
+                        // 有效的签名算法列表，仅列出的算法是有效的（强烈建议不要设置该属性）
                         // 默认 null，即所有算法均可
-                        ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256, SecurityAlgorithms.RsaSha256 },
+                        ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Aes128CbcHmacSha256 },
                         // 有效的token类型
                         // 默认 null，即所有类型均可
                         ValidTypes = new[] { JwtConstants.HeaderType },
@@ -104,6 +106,9 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                         // 可以在验证token有效期时，允许一定的时间误差（如时间刚达到token中exp，但是允许未来5分钟内该token仍然有效）
                         // 默认 300s，即 5min
                         ClockSkew = TimeSpan.Zero,
+
+                        // token解密密钥
+                        TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!"))
                     };
 
                     // 当token验证通过后（执行完 JwtBearerEvents.TokenValidated 后），
@@ -156,6 +161,8 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
         {
             if (env.IsDevelopment())
             {
+                // 用于展示加密、签名时的详细错误信息
+                IdentityModelEventSource.ShowPII = true;
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "XXTk.Auth.Samples.Jwt.HttpApi v1"));

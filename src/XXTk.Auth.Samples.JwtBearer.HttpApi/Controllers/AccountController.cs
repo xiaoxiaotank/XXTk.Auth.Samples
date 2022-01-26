@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Dtos;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
@@ -66,7 +67,8 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
                 Audience = _jwtBearerOptions.TokenValidationParameters.ValidAudience,
                 // 必须 Utc，默认1小时
                 Expires = DateTime.UtcNow.AddMinutes(10),
-                SigningCredentials = _signingCredentials
+                SigningCredentials = _signingCredentials,
+                EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!")), JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes128CbcHmacSha256)
             };
 
             var handler = _jwtBearerOptions.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>().FirstOrDefault()
