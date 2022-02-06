@@ -10,7 +10,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer
     public class AppJwtBearerEvents : JwtBearerEvents
     {
         private readonly JwtOptions _jwtOptions;
-        public AppJwtBearerEvents(IOptions<JwtOptions> jwtOptions)
+        public AppJwtBearerEvents(IOptionsSnapshot<JwtOptions> jwtOptions)
         {
             _jwtOptions = jwtOptions.Value;
         }

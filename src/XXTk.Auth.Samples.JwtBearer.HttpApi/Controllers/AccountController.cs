@@ -23,14 +23,17 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly JwtBearerOptions _jwtBearerOptions;
+        private readonly JwtOptions _jwtOptions;
         private readonly SigningCredentials _signingCredentials;
 
         public AccountController(
             IOptionsSnapshot<JwtBearerOptions> jwtBearerOptions,
+            IOptionsSnapshot<JwtOptions> jwtOptions,
             SigningCredentials signingCredentials)
         {
             _jwtBearerOptions = jwtBearerOptions.Get(JwtBearerDefaults.AuthenticationScheme);
-            _signingCredentials = signingCredentials;
+            _jwtOptions = jwtOptions.Value;
+            _signingCredentials = signingCredentials;           
         }
 
         [AllowAnonymous]
@@ -63,12 +66,12 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
                     new Claim(JwtClaimTypes.Id, user.Id),
                     new Claim(JwtClaimTypes.Name, user.UserName)
                 }),
-                Issuer = _jwtBearerOptions.TokenValidationParameters.ValidIssuer,
-                Audience = _jwtBearerOptions.TokenValidationParameters.ValidAudience,
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience,
                 // 必须 Utc，默认1小时
-                Expires = DateTime.UtcNow.AddMinutes(10),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresMinutes),
                 SigningCredentials = _signingCredentials,
-                EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!")), JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes128CbcHmacSha256)
+                //EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!")), JwtConstants.DirectKeyUseAlg, SecurityAlgorithms.Aes128CbcHmacSha256)
             };
 
             var handler = _jwtBearerOptions.SecurityTokenValidators.OfType<JwtSecurityTokenHandler>().FirstOrDefault()

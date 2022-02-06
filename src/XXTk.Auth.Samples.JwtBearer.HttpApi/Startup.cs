@@ -8,9 +8,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer;
 
@@ -30,21 +32,19 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<JwtOptions>(Configuration.GetSection(JwtOptions.Name));
+
             var jwtOptions = Configuration.GetSection(JwtOptions.Name).Get<JwtOptions>();
 
-            #region Rsa相关配置
-            jwtOptions.RsaSecurityPrivateKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.private.json"));
-            jwtOptions.RsaSecurityPublicKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.public.json"));
-            jwtOptions.Algorithms = SecurityAlgorithms.RsaSha256Signature;
-            #endregion
-
-            services.AddSingleton(jwtOptions);
-
             // 使用对称加密进行签名（不推荐）
-            //services.AddSingleton(sp => new SigningCredentials(jwtOptions.SymmetricSecurityKey, jwtOptions.Algorithms));
+            services.AddSingleton(sp => new SigningCredentials(jwtOptions.SymmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature));
 
             // 使用非对称加密进行签名（推荐）
-            services.AddSingleton(sp => new SigningCredentials(jwtOptions.RsaSecurityPrivateKey, jwtOptions.Algorithms));
+            //var rsaSecurityPrivateKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.private.json"));
+            //var rsaSecurityPublicKeyString = File.ReadAllText(Path.Combine(Env.ContentRootPath, "Rsa", "key.public.json"));
+            //RsaSecurityKey rsaSecurityPrivateKey = new(JsonConvert.DeserializeObject<RSAParameters>(rsaSecurityPrivateKeyString));
+            //RsaSecurityKey rsaSecurityPublicKey = new(JsonConvert.DeserializeObject<RSAParameters>(rsaSecurityPublicKeyString));
+            //services.AddSingleton(sp => new SigningCredentials(rsaSecurityPrivateKey, SecurityAlgorithms.RsaSha256Signature));
 
             services.AddScoped<AppJwtBearerEvents>();
 
@@ -79,9 +79,9 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
                         // 签发者用于token签名的密钥
                         // 对称加密，使用相同的key进行加签验签
-                        //IssuerSigningKey = jwtOptions.SymmetricSecurityKey,
+                        IssuerSigningKey = jwtOptions.SymmetricSecurityKey,
                         // 非对称加密，使用私钥加签，使用公钥验签
-                        IssuerSigningKey = jwtOptions.RsaSecurityPublicKey,
+                        //IssuerSigningKey = rsaSecurityPublicKey,
                         // 是否验证签发者用于token签名的密钥
                         // 默认 false
                         ValidateIssuerSigningKey = true,
@@ -108,7 +108,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                         ClockSkew = TimeSpan.Zero,
 
                         // token解密密钥
-                        TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!"))
+                        //TokenDecryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Total Bytes Length At Least 256!"))
                     };
 
                     // 当token验证通过后（执行完 JwtBearerEvents.TokenValidated 后），
@@ -132,7 +132,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "XXTk.Auth.Samples.Jwt.HttpApi", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "XXTk.Auth.Samples.JwtBearer.HttpApi", Version = "v1" });
 
                 var securitySchema = new OpenApiSecurityScheme
                 {
@@ -165,7 +165,7 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
                 IdentityModelEventSource.ShowPII = true;
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "XXTk.Auth.Samples.Jwt.HttpApi v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "XXTk.Auth.Samples.JwtBearer.HttpApi v1"));
             }
 
             app.UseRouting();
