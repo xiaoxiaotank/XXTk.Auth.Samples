@@ -9,6 +9,16 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
 {
     public class AppJwtBearerEvents : JwtBearerEvents
     {
+        public override Task MessageReceived(MessageReceivedContext context)
+        {
+            if(context.Request.Cookies.TryGetValue(HeaderNames.Authorization, out var token))
+            {
+                context.Token = token;
+            }
+
+            return Task.CompletedTask;
+        }
+
         /// <summary>
         /// 质询
         /// </summary>

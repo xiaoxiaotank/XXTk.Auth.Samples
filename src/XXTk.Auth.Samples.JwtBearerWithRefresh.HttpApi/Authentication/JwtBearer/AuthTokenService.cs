@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,6 +14,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Dtos;
+using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBearer
 {
@@ -25,29 +27,62 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
         private readonly SigningCredentials _signingCredentials;
         private readonly IDistributedCache _distributedCache;
         private readonly ILogger<AuthTokenService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthTokenService(
            IOptionsSnapshot<JwtBearerOptions> jwtBearerOptions,
            IOptionsSnapshot<JwtOptions> jwtOptions,
            SigningCredentials signingCredentials,
            IDistributedCache distributedCache,
-           ILogger<AuthTokenService> logger)
+           ILogger<AuthTokenService> logger,
+           IHttpContextAccessor httpContextAccessor)
         {
             _jwtBearerOptions = jwtBearerOptions.Get(JwtBearerDefaults.AuthenticationScheme);
             _jwtOptions = jwtOptions.Value;
             _signingCredentials = signingCredentials;
             _distributedCache = distributedCache;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthTokenDto> CreateAuthTokenAsync(UserDto user)
         {
             var result = new AuthTokenDto();
+
             var (refreshTokenId, refreshToken) = await CreateRefreshTokenAsync(user.Id);
             result.RefreshToken = refreshToken;
             result.AccessToken = CreateJwtToken(user, refreshTokenId);
 
+            // 将Jwt放入Cookie，这样H5就无需在Header中Jwt传递了（主要是省事）
+            _httpContextAccessor.HttpContext.Response.Cookies.Append(HeaderNames.Authorization, result.AccessToken, new CookieOptions
+            {
+                // 本地环境，忽略域
+                //Domain = "",
+                HttpOnly = true,
+                IsEssential = true,
+                MaxAge = TimeSpan.FromDays(_jwtOptions.RefreshTokenExpiresDays),
+                Path = "/",
+                SameSite = SameSiteMode.Lax
+            });
+
             return result;
+        }
+
+        private async Task<(string refreshTokenId, string refreshToken)> CreateRefreshTokenAsync(string userId)
+        {
+            var tokenId = Guid.NewGuid().ToString("N");
+
+            var rnBytes = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(rnBytes);
+            var token = Convert.ToBase64String(rnBytes);
+
+            var options = new DistributedCacheEntryOptions();
+            options.SetAbsoluteExpiration(TimeSpan.FromDays(_jwtOptions.RefreshTokenExpiresDays));
+            
+            await _distributedCache.SetStringAsync(GetRefreshTokenKey(userId, tokenId), token, options);
+
+            return (tokenId, token);
         }
 
         private string CreateJwtToken(UserDto user, string refreshTokenId)
@@ -63,8 +98,8 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
                     new Claim(JwtClaimTypes.Name, user.UserName),
                     new Claim(RefreshTokenIdClaimType, refreshTokenId)
                 }),
-                Issuer = _jwtBearerOptions.TokenValidationParameters.ValidIssuer,
-                Audience = _jwtBearerOptions.TokenValidationParameters.ValidAudience,
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience,
                 Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpiresMinutes),
                 SigningCredentials = _signingCredentials,
             };
@@ -75,25 +110,7 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
             var token = handler.WriteToken(securityToken);
 
             return token;
-        }
-
-        private async Task<(string refreshTokenId, string refreshToken)> CreateRefreshTokenAsync(string userId)
-        {
-            var rnBytes = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(rnBytes);
-
-            var token = Convert.ToBase64String(rnBytes);
-
-            var options = new DistributedCacheEntryOptions();
-            options.SetAbsoluteExpiration(TimeSpan.FromDays(_jwtOptions.RefreshTokenExpiresDays));
-
-            var tokenId = Guid.NewGuid().ToString("N");
-            await _distributedCache.SetStringAsync(GetRefreshTokenKey(userId, tokenId), token, options);
-
-            return (tokenId, token);
-
-        }
+        }       
 
         public async Task<AuthTokenDto> RefreshAuthTokenAsync(AuthTokenDto token)
         {

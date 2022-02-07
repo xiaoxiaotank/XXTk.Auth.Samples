@@ -2,6 +2,6 @@
   "Jwt": {
     "Audience": "http://localhost:5000",
     "Issuer": "http://localhost:5000",
-    "AccessTokenExpiresMinutes": 0.1
+    //"AccessTokenExpiresMinutes": 0.1
   }
 }
