@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -32,6 +34,8 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDistributedMemoryCache();
+
             services.Configure<JwtOptions>(Configuration.GetSection(JwtOptions.Name));
 
             var jwtOptions = Configuration.GetSection(JwtOptions.Name).Get<JwtOptions>();
@@ -118,8 +122,9 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
                     // token验证处理器列表
                     // 默认 有1个 JwtSecurityTokenHandler
-                    options.SecurityTokenValidators.Clear();
-                    options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler());
+                    //options.SecurityTokenValidators.Clear();
+                    //options.SecurityTokenValidators.Add(new JwtSecurityTokenHandler());
+                    // 通过Post添加AppJwtSecurityTokenHandler
 
                     // 受众，指该token是服务于哪个群体的（群体范围名），或该token所授予的有权限的资源是哪一块（资源的uri）
                     // 该属性主要用于当其不为空，但 TokenValidationParameters.ValidAudience 为空时，将其赋值给 TokenValidationParameters.ValidAudience
@@ -128,6 +133,8 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi
 
                     options.EventsType = typeof(AppJwtBearerEvents);
                 });
+
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<JwtBearerOptions>, AppJwtBearerPostConfigureOptions>());
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

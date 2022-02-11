@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -14,6 +15,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
+using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Dtos;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
@@ -25,15 +28,18 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
         private readonly JwtBearerOptions _jwtBearerOptions;
         private readonly JwtOptions _jwtOptions;
         private readonly SigningCredentials _signingCredentials;
+        private readonly IDistributedCache _distributedCache;
 
         public AccountController(
             IOptionsSnapshot<JwtBearerOptions> jwtBearerOptions,
             IOptionsSnapshot<JwtOptions> jwtOptions,
-            SigningCredentials signingCredentials)
+            SigningCredentials signingCredentials,
+            IDistributedCache distributedCache)
         {
             _jwtBearerOptions = jwtBearerOptions.Get(JwtBearerDefaults.AuthenticationScheme);
             _jwtOptions = jwtOptions.Value;
-            _signingCredentials = signingCredentials;           
+            _signingCredentials = signingCredentials;
+            _distributedCache = distributedCache;
         }
 
         [AllowAnonymous]
@@ -80,6 +86,15 @@ namespace XXTk.Auth.Samples.JwtBearer.HttpApi.Controllers
             var token = handler.WriteToken(securityToken);
 
             return token;
+        }
+
+        [HttpPost("modify-password")]
+        public async Task<IActionResult> ModifyPassword()
+        {
+            var userId = ((ClaimsIdentity)User.Identity).Claims.First(c => c.Type == JwtClaimTypes.Id).Value;
+            await _distributedCache.SetStringAsync(userId, JsonConvert.SerializeObject(new AuthUser { LastModifyPasswordTime = DateTime.Now }));
+
+            return Ok();
         }
 
         /// <summary>
