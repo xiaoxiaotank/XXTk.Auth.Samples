@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.RoleBased
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.ClaimsBased.HttpApi", "src\XXTk.Auth.Samples.ClaimsBased.HttpApi\XXTk.Auth.Samples.ClaimsBased.HttpApi.csproj", "{57AE5F33-5ABB-455F-BBD8-1F21E133840D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.PolicyBased.HttpApi", "src\XXTk.Auth.Samples.PolicyBased.HttpApi\XXTk.Auth.Samples.PolicyBased.HttpApi.csproj", "{3203BD5B-D4AC-4750-8886-9031806DE15D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{57AE5F33-5ABB-455F-BBD8-1F21E133840D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57AE5F33-5ABB-455F-BBD8-1F21E133840D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57AE5F33-5ABB-455F-BBD8-1F21E133840D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{143FF1AD-3AE9-47E9-B081-5DCD47ED37DF} = {87984C44-0112-438F-8A45-3463BE5FE2BA}
 		{A1D3A40D-66AE-4C77-9722-AC83EA89440B} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
 		{57AE5F33-5ABB-455F-BBD8-1F21E133840D} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
+		{3203BD5B-D4AC-4750-8886-9031806DE15D} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D62438B1-EBAE-4804-833D-B37197F461B5}
