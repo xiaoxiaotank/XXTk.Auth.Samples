@@ -48,6 +48,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
             // 当Handler中依赖其他服务时，注意生命周期提升的问题
             services.AddTransient<IAuthorizationHandler, MinimumAgeAuthorizationHandler>();
             services.AddTransient<IAuthorizationHandler, MinimumAgeAnotherAuthorizationHandler>();
+            services.AddTransient<IAuthorizationHandler, MultiRequirementsAuthorizationHandler>();          
 
             services.AddSingleton<IAuthorizationPolicyProvider, MinimumAgeAuthorizationPolicyProvider>();
 
@@ -55,7 +56,8 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("AtLeast18Age", policy => policy.Requirements.Add(new MinimumAgeRequirement(18)));
+                //options.InvokeHandlersAfterFailure = false;
+                options.AddPolicy("AtLeast18Age", policy => policy.RequireMinimumAge(18));
             });
 
             services.AddControllers();
