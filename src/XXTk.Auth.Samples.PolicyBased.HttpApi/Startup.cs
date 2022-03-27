@@ -51,6 +51,8 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
 
             services.AddSingleton<IAuthorizationPolicyProvider, MinimumAgeAuthorizationPolicyProvider>();
 
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, MyAuthorizationMiddlewareResultHandler>();
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("AtLeast18Age", policy => policy.Requirements.Add(new MinimumAgeRequirement(18)));
