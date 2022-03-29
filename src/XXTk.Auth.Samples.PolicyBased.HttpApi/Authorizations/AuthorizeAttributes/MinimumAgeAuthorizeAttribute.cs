@@ -4,7 +4,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
 {
     public class MinimumAgeAuthorizeAttribute : AuthorizeAttribute
     {
-        public const string POLICY_PREFIX = "MinimumAge";
+        public const string PolicyPrefix = "MinimumAge";
 
         public MinimumAgeAuthorizeAttribute(int minimumAge) =>
             MinimumAge = minimumAge;
@@ -13,7 +13,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
         {
             get
             {
-                if (int.TryParse(Policy[POLICY_PREFIX.Length..], out var age))
+                if (int.TryParse(Policy[PolicyPrefix.Length..], out var age))
                 {
                     return age;
                 }
@@ -23,7 +23,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
             set
             {
                 // 生成动态的Policy
-                Policy = $"{POLICY_PREFIX}{value}";
+                Policy = $"{PolicyPrefix}{value}";
             }
         }
     }

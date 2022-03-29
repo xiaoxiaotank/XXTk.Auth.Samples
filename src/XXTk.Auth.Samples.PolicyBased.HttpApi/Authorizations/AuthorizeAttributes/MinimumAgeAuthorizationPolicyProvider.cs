@@ -16,8 +16,8 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
 
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-            if (policyName.StartsWith(MinimumAgeAuthorizeAttribute.POLICY_PREFIX, StringComparison.OrdinalIgnoreCase) 
-                && int.TryParse(policyName[MinimumAgeAuthorizeAttribute.POLICY_PREFIX.Length..], out var age))
+            if (policyName.StartsWith(MinimumAgeAuthorizeAttribute.PolicyPrefix, StringComparison.OrdinalIgnoreCase) 
+                && int.TryParse(policyName[MinimumAgeAuthorizeAttribute.PolicyPrefix.Length..], out var age))
             {
                 var policy = new AuthorizationPolicyBuilder();
                 policy.AddRequirements(new MinimumAgeRequirement(age));
