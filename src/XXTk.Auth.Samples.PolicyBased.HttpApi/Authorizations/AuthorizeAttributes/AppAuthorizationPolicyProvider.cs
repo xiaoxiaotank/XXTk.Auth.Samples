@@ -2,9 +2,6 @@
 using Microsoft.Extensions.Options;
 using Nito.AsyncEx;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations

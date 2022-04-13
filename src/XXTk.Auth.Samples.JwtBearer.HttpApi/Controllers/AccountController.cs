@@ -14,7 +14,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Dtos;

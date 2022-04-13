@@ -1,6 +1,4 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi

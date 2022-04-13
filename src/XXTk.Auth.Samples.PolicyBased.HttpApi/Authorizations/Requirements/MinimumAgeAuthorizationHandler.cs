@@ -28,7 +28,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
             else if (context.Resource is AuthorizationFilterContext mvcContext)
             {
 
-            } 
+            }
             #endregion
 
             // 这里也可以从数据库中获取生日信息

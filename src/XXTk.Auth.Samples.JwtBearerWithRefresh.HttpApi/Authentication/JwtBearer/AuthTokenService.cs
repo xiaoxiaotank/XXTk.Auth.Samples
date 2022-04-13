@@ -79,7 +79,7 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
 
             var options = new DistributedCacheEntryOptions();
             options.SetAbsoluteExpiration(TimeSpan.FromDays(_jwtOptions.RefreshTokenExpiresDays));
-            
+
             await _distributedCache.SetStringAsync(GetRefreshTokenKey(userId, tokenId), token, options);
 
             return (tokenId, token);
@@ -110,7 +110,7 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
             var token = handler.WriteToken(securityToken);
 
             return token;
-        }       
+        }
 
         public async Task<AuthTokenDto> RefreshAuthTokenAsync(AuthTokenDto token)
         {

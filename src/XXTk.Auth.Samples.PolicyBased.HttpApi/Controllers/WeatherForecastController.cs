@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations;
 
 namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Controllers

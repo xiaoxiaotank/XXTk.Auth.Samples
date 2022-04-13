@@ -10,12 +10,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using XXTk.Auth.Samples.JwtBearer.HttpApi.Authentication.JwtBearer;
 
 namespace XXTk.Auth.Samples.JwtBearer.HttpApi

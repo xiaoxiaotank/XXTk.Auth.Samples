@@ -1,19 +1,13 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations;
 
@@ -50,7 +44,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
             // 当Handler中依赖其他服务时，注意生命周期提升的问题
             services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MinimumAgeAuthorizationHandler>());
             services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MinimumAgeAnotherAuthorizationHandler>());
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MultiRequirementsAuthorizationHandler>());          
+            services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MultiRequirementsAuthorizationHandler>());
 
             services.AddTransient<IAuthorizationPolicyProvider, AppAuthorizationPolicyProvider>();
 
@@ -78,7 +72,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "XXTk.Auth.Samples.PolicyBased.HttpApi v1"));
             }
-            
+
             app.UseRouting();
 
             app.UseAuthentication();

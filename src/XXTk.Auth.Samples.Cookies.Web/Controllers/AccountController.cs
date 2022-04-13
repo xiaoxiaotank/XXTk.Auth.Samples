@@ -124,7 +124,7 @@ namespace XXTk.Auth.Samples.Cookies.Web.Controllers
 
             return Redirect("/");
         }
-        
+
         /// <summary>
         /// 模拟更新账户信息后，用户需要重新登录
         /// </summary>

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations

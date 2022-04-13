@@ -48,7 +48,7 @@ namespace XXTk.Auth.Samples.Cookies.Web
         public async Task<AuthenticationTicket> RetrieveAsync(string key)
         {
             var ticketByte = await _cache.GetAsync(key);
-            if(ticketByte is null)
+            if (ticketByte is null)
             {
                 return null;
             }

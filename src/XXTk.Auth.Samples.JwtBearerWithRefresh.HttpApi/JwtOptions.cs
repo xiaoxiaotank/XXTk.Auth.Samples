@@ -12,6 +12,6 @@
 
         public double AccessTokenExpiresMinutes { get; set; } = DefaultAccessTokenExpiresMinutes;
 
-        public double RefreshTokenExpiresDays { get; set;} = DefaultRefreshTokenExpiresDays;
+        public double RefreshTokenExpiresDays { get; set; } = DefaultRefreshTokenExpiresDays;
     }
 }

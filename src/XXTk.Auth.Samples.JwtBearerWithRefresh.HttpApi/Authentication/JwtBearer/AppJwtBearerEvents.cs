@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
-using System;
 using System.Threading.Tasks;
 
 namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBearer
@@ -11,7 +9,7 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
     {
         public override Task MessageReceived(MessageReceivedContext context)
         {
-            if(context.Request.Cookies.TryGetValue(HeaderNames.Authorization, out var token))
+            if (context.Request.Cookies.TryGetValue(HeaderNames.Authorization, out var token))
             {
                 context.Token = token;
             }
@@ -27,7 +25,7 @@ namespace XXTk.Auth.Samples.JwtBearerWithRefresh.HttpApi.Authentication.JwtBeare
         public override Task Challenge(JwtBearerChallengeContext context)
         {
             // 添加标记，使前端知晓access token过期，可以使用refresh token了
-            if(context.AuthenticateFailure is SecurityTokenExpiredException)
+            if (context.AuthenticateFailure is SecurityTokenExpiredException)
             {
                 context.Response.Headers.Add("x-access-token", "expired");
             }
