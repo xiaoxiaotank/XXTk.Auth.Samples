@@ -53,5 +53,12 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Controllers
         {
             return "At least 20 age";
         }
+
+        [HttpGet("GetForAtLeast25Age")]
+        [MinimumAgeAuthorize(25)]
+        public string GetForAtLeast25Age()
+        {
+            return "At least 25 age";
+        }
     }
 }

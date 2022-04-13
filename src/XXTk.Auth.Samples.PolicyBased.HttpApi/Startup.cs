@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -51,7 +52,7 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi
             services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MinimumAgeAnotherAuthorizationHandler>());
             services.TryAddEnumerable(ServiceDescriptor.Transient<IAuthorizationHandler, MultiRequirementsAuthorizationHandler>());          
 
-            services.AddTransient<IAuthorizationPolicyProvider, MinimumAgeAuthorizationPolicyProvider>();
+            services.AddTransient<IAuthorizationPolicyProvider, AppAuthorizationPolicyProvider>();
 
             services.AddTransient<IAuthorizationMiddlewareResultHandler, MyAuthorizationMiddlewareResultHandler>();
 

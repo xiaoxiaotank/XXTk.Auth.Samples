@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -65,6 +66,19 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             return Ok();
+        }
+
+        [HttpGet("NonAuthorize")]
+        public string NonAuthorize()
+        {
+            return "NonAuthorize";
+        }
+
+        [HttpGet("DefaultAuthorize")]
+        [Authorize]
+        public string DefaultAuthorize()
+        {
+            return "DefaultAuthorize";
         }
     }
 }
