@@ -22,8 +22,6 @@ namespace XXTk.Auth.Samples.PolicyBased.HttpApi.Authorizations
             _authorizationOptions = options.Value;
         }
 
-        private ConcurrentDictionary<string, AuthorizationPolicy> PolicyMap { get; } = new(StringComparer.OrdinalIgnoreCase);
-
         private DefaultAuthorizationPolicyProvider BackupPolicyProvider { get; }
 
         public async Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
