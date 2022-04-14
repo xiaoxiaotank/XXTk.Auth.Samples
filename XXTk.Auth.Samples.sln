@@ -13,11 +13,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authentications", "Authenti
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorizations", "Authorizations", "{1BA87139-8AB3-4238-88EF-FCCA697F1539}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.RoleBased.HttpApi", "src\XXTk.Auth.Samples.RoleBased.HttpApi\XXTk.Auth.Samples.RoleBased.HttpApi.csproj", "{A1D3A40D-66AE-4C77-9722-AC83EA89440B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XXTk.Auth.Samples.RoleBased.HttpApi", "src\XXTk.Auth.Samples.RoleBased.HttpApi\XXTk.Auth.Samples.RoleBased.HttpApi.csproj", "{A1D3A40D-66AE-4C77-9722-AC83EA89440B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.ClaimsBased.HttpApi", "src\XXTk.Auth.Samples.ClaimsBased.HttpApi\XXTk.Auth.Samples.ClaimsBased.HttpApi.csproj", "{57AE5F33-5ABB-455F-BBD8-1F21E133840D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XXTk.Auth.Samples.ClaimsBased.HttpApi", "src\XXTk.Auth.Samples.ClaimsBased.HttpApi\XXTk.Auth.Samples.ClaimsBased.HttpApi.csproj", "{57AE5F33-5ABB-455F-BBD8-1F21E133840D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.PolicyBased.HttpApi", "src\XXTk.Auth.Samples.PolicyBased.HttpApi\XXTk.Auth.Samples.PolicyBased.HttpApi.csproj", "{3203BD5B-D4AC-4750-8886-9031806DE15D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XXTk.Auth.Samples.PolicyBased.HttpApi", "src\XXTk.Auth.Samples.PolicyBased.HttpApi\XXTk.Auth.Samples.PolicyBased.HttpApi.csproj", "{3203BD5B-D4AC-4750-8886-9031806DE15D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XXTk.Auth.Samples.Permission.HttpApi", "src\XXTk.Auth.Samples.Permission.HttpApi\XXTk.Auth.Samples.Permission.HttpApi.csproj", "{ED444CE6-EFC2-49BF-8094-2E17803065A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3203BD5B-D4AC-4750-8886-9031806DE15D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED444CE6-EFC2-49BF-8094-2E17803065A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED444CE6-EFC2-49BF-8094-2E17803065A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED444CE6-EFC2-49BF-8094-2E17803065A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED444CE6-EFC2-49BF-8094-2E17803065A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -60,6 +66,7 @@ Global
 		{A1D3A40D-66AE-4C77-9722-AC83EA89440B} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
 		{57AE5F33-5ABB-455F-BBD8-1F21E133840D} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
 		{3203BD5B-D4AC-4750-8886-9031806DE15D} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
+		{ED444CE6-EFC2-49BF-8094-2E17803065A8} = {1BA87139-8AB3-4238-88EF-FCCA697F1539}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D62438B1-EBAE-4804-833D-B37197F461B5}
